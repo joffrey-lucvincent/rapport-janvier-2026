@@ -391,7 +391,7 @@
             </div>
 
             <div class="chart-container">
-                <h3 class="chart-title">Top 10 Campagnes Meta - Janvier 2026</h3>
+                <h3 class="chart-title">Top 10 Campagnes Meta - Janvier 2026 (Par Revenue)</h3>
                 <canvas id="metaCampaignsChart"></canvas>
             </div>
 
@@ -867,10 +867,10 @@
         new Chart(document.getElementById('metaCampaignsChart'), {
             type: 'bar',
             data: {
-                labels: ['Coffret V2 QC FR', 'ABO TOF', 'Catalogue', 'Coffret V1 QC FR', 'Coffret V2 EN', 'ABO BOF', 'Routines -30%', 'Antirosette', 'Coffret V1 EN', 'Winback 2026'],
+                labels: ['Coffret V1 QC FR', 'Coffret V2 QC FR', 'Coffret V1 QC EN', 'Catalogue QC FR', 'ABO TOF', 'Coffret V2 EN', 'Routines -30%', 'Antirosette', 'ABO BOF', 'Winback'],
                 datasets: [{
-                    label: 'Spend (CAD)',
-                    data: [16473, 9745, 6777, 5939, 4582, 3664, 3097, 2676, 2593, 882],
+                    label: 'Revenue (CAD)',
+                    data: [84334, 58656, 22425, 21248, 20906, 12155, 5670, 5202, 5006, 2107],
                     backgroundColor: '#667eea'
                 }]
             },
