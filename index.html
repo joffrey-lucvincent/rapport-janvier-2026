@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Janvier 2026 - Luc Vincent Coiffure</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2D3748; --secondary: #4A5568; --accent: #3182CE;
+            --success: #38A169; --warning: #D69E2E; --danger: #E53E3E;
+            --light: #F7FAFC; --white: #FFFFFF;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--primary); line-height: 1.6;
+        }
+        .header {
+            background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+        .header h1 { color: var(--primary); font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .header-subtitle { color: var(--secondary); font-size: 0.95rem; }
+        .nav-tabs {
+            display: flex; gap: 0.5rem; margin-top: 1rem;
+            overflow-x: auto; padding-bottom: 0.5rem;
+        }
+        .nav-tab {
+            padding: 0.75rem 1.5rem; background: var(--light); border: none;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            color: var(--secondary); transition: all 0.3s; white-space: nowrap;
+        }
+        .nav-tab:hover {
+            background: var(--accent); color: var(--white); transform: translateY(-2px);
+        }
+        .nav-tab.active { background: var(--accent); color: var(--white); }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem 2rem; }
+        .section { display: none; animation: fadeIn 0.5s; }
+        .section.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background: var(--white); border-radius: 12px; padding: 1.5rem;
+            margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .metric-card { text-align: center; padding: 1rem; }
+        .metric-label { color: var(--secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .metric-value { color: var(--primary); font-size: 2rem; font-weight: 700; }
+        .metric-change {
+            font-size: 0.85rem; margin-top: 0.5rem;
+            display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px;
+        }
+        .metric-change.positive { background: #C6F6D5; color: #22543D; }
+        .metric-change.negative { background: #FED7D7; color: #742A2A; }
+        .metric-change.warning { background: #FEEBC8; color: #7C2D12; }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(49, 130, 206, 0.1) 0%, rgba(49, 130, 206, 0.05) 100%);
+            border-left: 4px solid var(--accent); padding: 1.5rem;
+            border-radius: 8px; margin-bottom: 1.5rem;
+        }
+        .highlight-box h2 { color: var(--primary); margin-bottom: 0.5rem; }
+        .highlight-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .highlight-stat {
+            text-align: center; padding: 1rem;
+            background: var(--white); border-radius: 8px;
+        }
+        .highlight-stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .chart-container {
+            background: var(--white); padding: 2rem; border-radius: 12px;
+            margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .chart-title {
+            color: var(--primary); font-size: 1.25rem;
+            font-weight: 600; margin-bottom: 1.5rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        table th, table td {
+            padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--light);
+        }
+        table th { background: var(--light); font-weight: 600; color: var(--primary); }
+        .badge {
+            display: inline-block; padding: 0.25rem 0.75rem;
+            border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+        }
+        .badge-success { background: #C6F6D5; color: #22543D; }
+        .badge-warning { background: #FEEBC8; color: #7C2D12; }
+        .badge-danger { background: #FED7D7; color: #742A2A; }
+        .insight-card {
+            background: #EBF8FF; border-left: 4px solid var(--accent);
+            padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;
+        }
+        .insight-card h3 { color: var(--accent); margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>❄️ Rapport Janvier 2026 - Nouvelle Année</h1>
+            <p class="header-subtitle">Luc Vincent Coiffure - Performance Québec</p>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showSection('overview')">Vue d'Ensemble</button>
+                <button class="nav-tab" onclick="showSection('tv-impact')">Impact TV 14 Janvier</button>
+                <button class="nav-tab" onclick="showSection('campaigns')">Campagnes Meta</button>
+                <button class="nav-tab" onclick="showSection('google')">Google Ads</button>
+                <button class="nav-tab" onclick="showSection('shopify')">Shopify</button>
+                <button class="nav-tab" onclick="showSection('klaviyo')">Klaviyo</button>
+                <button class="nav-tab" onclick="showSection('insights')">Insights</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- VUE D'ENSEMBLE -->
+        <section id="overview" class="section active">
+            <div class="highlight-box">
+                <h2>🎯 Performance Globale - Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Excellent démarrage d'année avec passage TV stratégique le 14 janvier</p>
+                
+                <div class="highlight-grid" style="margin-top: 1.5rem;">
+                    <div class="highlight-stat">
+                        <div class="highlight-stat-value">68 463 CAD</div>
+                        <div>Investissement Total</div>
+                    </div>
+                    <div class="highlight-stat">
+                        <div class="highlight-stat-value">328 865 CAD</div>
+                        <div>CA Total Ads</div>
+                    </div>
+                    <div class="highlight-stat">
+                        <div class="highlight-stat-value">4.80</div>
+                        <div>ROAS Blended</div>
+                    </div>
+                    <div class="highlight-stat">
+                        <div class="highlight-stat-value">2 916</div>
+                        <div>Conversions Totales</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Meta Ads - Investissement</div>
+                    <div class="metric-value">57 545 CAD</div>
+                    <span class="metric-change positive">Québec uniquement</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Meta Ads - CA</div>
+                    <div class="metric-value">244 353 CAD</div>
+                    <span class="metric-change positive">ROAS 4.24</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Meta Ads - Achats</div>
+                    <div class="metric-value">2 096</div>
+                    <span class="metric-change positive">CPA 27.46 CAD</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Google Brand - Investissement</div>
+                    <div class="metric-value">10 918 CAD</div>
+                    <span class="metric-change positive">Québec + Canada EN</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Google Brand - CA</div>
+                    <div class="metric-value">84 512 CAD</div>
+                    <span class="metric-change positive">ROAS 7.74</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Google Brand - Conversions</div>
+                    <div class="metric-value">820</div>
+                    <span class="metric-change positive">CPA 13.31 CAD</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Shopify - Ventes Brutes</div>
+                    <div class="metric-value">371 859 CAD</div>
+                    <span class="metric-change positive">3 056 commandes</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Shopify - Ventes Nettes</div>
+                    <div class="metric-value">321 039 CAD</div>
+                    <span class="metric-change positive">Panier 105.86 CAD</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Klaviyo - Revenue</div>
+                    <div class="metric-value">33 261 CAD</div>
+                    <span class="metric-change positive">257 conversions</span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Performance par Canal</h3>
+                <canvas id="channelPerformanceChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Investissement vs CA par Canal</h3>
+                <canvas id="investROIChart"></canvas>
+            </div>
+        </section>
+
+        <!-- IMPACT TV 14 JANVIER -->
+        <section id="tv-impact" class="section">
+            <div class="highlight-box">
+                <h2>📺 Impact Passage TV - 14 Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Salut Bonjour - Effet amplificateur majeur</p>
+            </div>
+
+            <div class="chart-container" style="background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%); border: 2px solid #E53E3E;">
+                <h3 class="chart-title" style="color: #E53E3E;">🏆 Performance du 14 Janvier</h3>
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 3rem; font-weight: 700; color: #E53E3E;">21 655,11 CAD</div>
+                    <div style="font-size: 1.2rem; color: var(--secondary); margin-top: 0.5rem;">CA Net - Journée du passage TV</div>
+                    <div style="font-size: 1rem; color: var(--secondary); margin-top: 1rem;">28 635,70 CAD CA Brut | 203 clients</div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">Répartition Clients - 14 Janvier</h4>
+                    <div class="grid">
+                        <div style="background: var(--white); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">76.8%</div>
+                            <div style="color: var(--secondary); margin-top: 0.5rem;">Nouveaux Clients</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; margin-top: 0.5rem;">156 clients</div>
+                        </div>
+                        <div style="background: var(--white); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent);">23.2%</div>
+                            <div style="color: var(--secondary); margin-top: 0.5rem;">Clients Connus</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; margin-top: 0.5rem;">47 clients</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.8); border-radius: 8px;">
+                    <strong>📧 Support Email Klaviyo :</strong> L'email "14JANV_SalutBonjour_FR" envoyé le jour même a généré 57 achats et 7,726 CAD de CA, amplifiant l'effet du passage TV.
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <h3>🎯 Synergie TV + Digital</h3>
+                <p>Le passage TV à Salut Bonjour le 14 janvier a créé un pic massif d'acquisition de nouveaux clients (76.8%) combiné à une forte activation des clients existants via l'email Klaviyo synchronisé.</p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li><strong>TV</strong> : Notoriété + trafic brand massif</li>
+                    <li><strong>Google Brand</strong> : Capture des recherches (ROAS 7.74)</li>
+                    <li><strong>Meta Ads</strong> : Retargeting + audiences chaudes</li>
+                    <li><strong>Klaviyo</strong> : Activation base email (7,726 CAD le jour J)</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light); border-radius: 8px;">
+                <strong>✅ Analyse :</strong> Le 14 janvier représente 6.7% du CA net total du mois en une seule journée. La forte proportion de nouveaux clients (76.8%) confirme l'effet d'acquisition massif de la TV, tandis que l'email Klaviyo a parfaitement capturé l'audience existante.
+            </div>
+        </section>
+
+        <!-- CAMPAGNES META -->
+        <section id="campaigns" class="section">
+            <div class="highlight-box">
+                <h2>📱 Meta Ads - Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Stratégie centrée sur Coffret 1+1 + Séchoir</p>
+            </div>
+
+            <div class="grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Investissement Total</div>
+                    <div class="metric-value">57 545 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Achats Total</div>
+                    <div class="metric-value">2 096</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">CA Généré</div>
+                    <div class="metric-value">244 353 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">ROAS Global</div>
+                    <div class="metric-value">4.24</div>
+                    <span class="metric-change positive">CPA 27.46 CAD</span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Top 10 Campagnes Meta - Janvier 2026</h3>
+                <canvas id="metaCampaignsChart"></canvas>
+            </div>
+
+            <div class="insight-card">
+                <h3>🔥 Top Performers Meta Ads</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campagne</th>
+                            <th>Spend</th>
+                            <th>Achats</th>
+                            <th>CA</th>
+                            <th>ROAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #C6F6D5;">
+                            <td><strong>Coffret 1+sechoir QC FR (V1)</strong></td>
+                            <td>5,939 CAD</td>
+                            <td>607</td>
+                            <td>84,334 CAD</td>
+                            <td><span class="badge badge-success">14.20</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coffret 1+sechoir QC EN</strong></td>
+                            <td>2,593 CAD</td>
+                            <td>158</td>
+                            <td>22,425 CAD</td>
+                            <td><span class="badge badge-success">8.65</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coffret 1+sechoir QC FR V2</strong></td>
+                            <td>16,473 CAD</td>
+                            <td>439</td>
+                            <td>58,656 CAD</td>
+                            <td><span class="badge badge-success">3.56</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Catalogue QC FR</strong></td>
+                            <td>6,777 CAD</td>
+                            <td>205</td>
+                            <td>21,248 CAD</td>
+                            <td><span class="badge badge-success">3.14</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coffret 1+sechoir QC EN V2</strong></td>
+                            <td>4,582 CAD</td>
+                            <td>94</td>
+                            <td>12,155 CAD</td>
+                            <td><span class="badge badge-warning">2.65</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ABO TOF QC FR</strong></td>
+                            <td>9,745 CAD</td>
+                            <td>251</td>
+                            <td>20,906 CAD</td>
+                            <td><span class="badge badge-warning">2.15</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="insight-card">
+                <h3>📊 Performance par Type d'Offre</h3>
+                <div style="margin-top: 1rem;">
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <strong>Coffret 1+1 + Séchoir (toutes versions) :</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Spend : 30,145 CAD (52.4% du budget)</li>
+                            <li>Achats : 1,311 (62.5% des achats)</li>
+                            <li>CA : 178,414 CAD (73% du CA)</li>
+                            <li>ROAS moyen : 5.92</li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <strong>Routines -30% :</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Spend : 3,097 CAD</li>
+                            <li>Achats : 58</li>
+                            <li>CA : 5,670 CAD</li>
+                            <li>ROAS : 1.83</li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px;">
+                        <strong>Promo Antirosette :</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Spend : 2,676 CAD</li>
+                            <li>Achats : 42</li>
+                            <li>CA : 4,832 CAD</li>
+                            <li>ROAS : 1.81</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light); border-radius: 8px;">
+                <strong>✅ Conclusion :</strong> Le "Coffret 1+1 + Séchoir" est clairement l'offre gagnante de janvier avec un ROAS moyen de 5.92 et 73% du CA total généré. La version V1 (ROAS 14.20) surperforme massivement.
+            </div>
+        </section>
+
+        <!-- GOOGLE ADS -->
+        <section id="google" class="section">
+            <div class="highlight-box">
+                <h2>🔍 Google Ads - Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Performance Brand exceptionnelle</p>
+            </div>
+
+            <div class="grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Investissement Total</div>
+                    <div class="metric-value">10 918 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Conversions</div>
+                    <div class="metric-value">820</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">CA Généré</div>
+                    <div class="metric-value">84 512 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">ROAS Global</div>
+                    <div class="metric-value">7.74</div>
+                    <span class="metric-change positive">CPA 13.31 CAD</span>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <h3>📊 Performance par Campagne</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campagne</th>
+                            <th>Spend</th>
+                            <th>Conversions</th>
+                            <th>CA</th>
+                            <th>ROAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brand QC (FR)</strong></td>
+                            <td>10,504 CAD</td>
+                            <td>754</td>
+                            <td>76,966 CAD</td>
+                            <td><span class="badge badge-success">7.33</span></td>
+                        </tr>
+                        <tr style="background: #C6F6D5;">
+                            <td><strong>Brand CA (EN)</strong></td>
+                            <td>414 CAD</td>
+                            <td>66</td>
+                            <td>7,547 CAD</td>
+                            <td><span class="badge badge-success">18.21</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Google Brand : ROAS par Campagne</h3>
+                <canvas id="googleROASChart"></canvas>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light); border-radius: 8px;">
+                <strong>✅ Analyse :</strong> Google Brand maintient une performance exceptionnelle avec un ROAS global de 7.74. La campagne EN (ROAS 18.21) surperforme massivement avec seulement 414 CAD de spend, capturant efficacement la notoriété générée par Meta et le passage TV.
+            </div>
+        </section>
+
+        <!-- SHOPIFY -->
+        <section id="shopify" class="section">
+            <div class="highlight-box">
+                <h2>🛒 Shopify - Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Excellent démarrage d'année</p>
+            </div>
+
+            <div class="grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Ventes Brutes</div>
+                    <div class="metric-value">371 859 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Ventes Nettes</div>
+                    <div class="metric-value">321 039 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Commandes</div>
+                    <div class="metric-value">3 056</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Panier Moyen</div>
+                    <div class="metric-value">105.86 CAD</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Sessions</div>
+                    <div class="metric-value">42 380</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Taux de Conversion</div>
+                    <div class="metric-value">4.44%</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Nouveaux Clients</div>
+                    <div class="metric-value">1 683</div>
+                    <span class="metric-change positive">55.5% des clients</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Clients Connus</div>
+                    <div class="metric-value">1 296</div>
+                    <span class="metric-change positive">44.5% des clients</span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Répartition CA Net par Type de Client</h3>
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <canvas id="customerTypeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <h3>💡 Analyse Stratégique</h3>
+                <p><strong>Répartition CA Net :</strong></p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li><strong>Nouveaux clients :</strong> 55.0% des commandes | 55.5% des clients</li>
+                    <li><strong>Clients connus :</strong> 45.0% des commandes | 44.5% des clients</li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Taux de conversion solide :</strong> 4.44% avec 42,380 sessions démontre une bonne efficacité du funnel, amplifiée par le passage TV du 14 janvier.</p>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #C6F6D5; border-radius: 8px; border-left: 4px solid var(--success);">
+                <strong>✅ Performance Janvier :</strong> Excellent démarrage d'année avec 371K de ventes brutes et un équilibre sain entre acquisition (55.5%) et rétention (44.5%). Le panier moyen de 105.86 CAD est le plus élevé observé récemment.
+            </div>
+        </section>
+
+        <!-- KLAVIYO -->
+        <section id="klaviyo" class="section">
+            <div class="highlight-box">
+                <h2>✉️ Klaviyo - Performance Email Janvier 2026</h2>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">Support efficace aux campagnes Ads - 0 SMS</p>
+            </div>
+
+            <div class="grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Destinataires</div>
+                    <div class="metric-value">178 000</div>
+                    <span class="metric-change negative">-61% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Ouvertures Uniques</div>
+                    <div class="metric-value">78 900</div>
+                    <span class="metric-change negative">-74.5% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Taux d'Ouverture</div>
+                    <div class="metric-value">44.4%</div>
+                    <span class="metric-change negative">-34.5% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Clics Uniques</div>
+                    <div class="metric-value">1 830</div>
+                    <span class="metric-change negative">-74.7% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Taux de Clics</div>
+                    <div class="metric-value">1.03%</div>
+                    <span class="metric-change negative">-35.1% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Conversions</div>
+                    <div class="metric-value">257</div>
+                    <span class="metric-change negative">-34.8% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Taux de Conversion</div>
+                    <div class="metric-value">0.145%</div>
+                    <span class="metric-change positive">+68.6% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Revenue Généré</div>
+                    <div class="metric-value">33 261 CAD</div>
+                    <span class="metric-change negative">-25.1% vs période précédente</span>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Valeur Moyenne Commande</div>
+                    <div class="metric-value">128 CAD</div>
+                    <span class="metric-change positive">+14.3% vs période précédente</span>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <h3>🔥 Top Campagnes Email (Triple Whale)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campagne</th>
+                            <th>Date</th>
+                            <th>Achats</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Welcome Series (Flow)</strong></td>
+                            <td>Automatique</td>
+                            <td>188</td>
+                            <td>23,515 CAD</td>
+                        </tr>
+                        <tr style="background: #FFF5F5;">
+                            <td><strong>14JANV_SalutBonjour_FR 📺</strong></td>
+                            <td>14 janv</td>
+                            <td>57</td>
+                            <td>7,726 CAD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>06JANV_NouvelleRoutine_FR</strong></td>
+                            <td>6 janv</td>
+                            <td>24</td>
+                            <td>3,220 CAD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>11JANV_Routine d'hiver_FR</strong></td>
+                            <td>11 janv</td>
+                            <td>17</td>
+                            <td>2,523 CAD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>08JANV_Age Update_FR</strong></td>
+                            <td>8 janv</td>
+                            <td>14</td>
+                            <td>1,597 CAD</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Top 5 Campagnes Klaviyo - Revenue</h3>
+                <canvas id="klaviyoCampaignsChart"></canvas>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light); border-radius: 8px;">
+                <strong>📧 Volume Emails :</strong> ~454 campagnes envoyées en janvier | 0 SMS
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light); border-radius: 8px;">
+                <strong>✅ Analyse :</strong> Le flow "Welcome Series" reste le champion (23,515 CAD). L'email synchronisé au passage TV du 14 janvier a parfaitement joué son rôle d'amplificateur avec 7,726 CAD. Baisse globale du volume vs décembre (période creuse post-fêtes), mais taux de conversion en hausse (+68.6%).
+            </div>
+        </section>
+
+        <!-- INSIGHTS -->
+        <section id="insights" class="section">
+            <div class="highlight-box">
+                <h2>💡 Insights Stratégiques</h2>
+            </div>
+
+            <div class="insight-card">
+                <h3>📺 L'Effet TV : Un Amplificateur Stratégique</h3>
+                <div style="margin-top: 1rem;">
+                    <p><strong>14 janvier = 6.7% du CA net mensuel en 1 journée :</strong></p>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                        <li>21,655 CAD de CA net (vs ~10,400 CAD moyenne quotidienne)</li>
+                        <li>76.8% de nouveaux clients (vs 55.5% mensuel)</li>
+                        <li>Email Klaviyo synchronisé : 7,726 CAD le jour J</li>
+                        <li>Google Brand capte le pic de recherches brand</li>
+                    </ul>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Conclusion :</strong> Le passage TV unique a généré un impact mesurable et durable, validant la stratégie de synchronisation multi-canaux (TV + Email + Google + Meta).</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>🎯 Coffret 1+1 + Séchoir : L'Offre Gagnante Confirmée</h3>
+                <div class="grid" style="margin-top: 1rem;">
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);">ROAS 14.20</div>
+                        <div style="color: var(--secondary);">Coffret V1 QC FR</div>
+                    </div>
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);">ROAS 8.65</div>
+                        <div style="color: var(--secondary);">Coffret QC EN</div>
+                    </div>
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);">73%</div>
+                        <div style="color: var(--secondary);">Part du CA Meta</div>
+                    </div>
+                    <div style="background: var(--white); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);">62.5%</div>
+                        <div style="color: var(--secondary);">Part des Achats</div>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Conclusion :</strong> L'offre "Coffret 1+1 + Séchoir" confirme son statut d'offre phare avec des performances exceptionnelles. La V1 (ROAS 14.20) surperforme massivement toutes les autres variations.</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>📊 Panier Moyen Record : 105.86 CAD</h3>
+                <p style="margin-top: 1rem;">Le panier moyen de janvier (105.86 CAD) est le plus élevé observé récemment :</p>
+                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li>Décembre 2025 : 93.11 CAD</li>
+                    <li>Novembre 2025 : ~82 CAD</li>
+                    <li>Janvier 2026 : <strong>105.86 CAD (+13.7% vs décembre)</strong></li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Explication :</strong> L'offre "Coffret 1+1 + Séchoir" combine valeur perçue élevée et incitation à l'achat groupé, poussant naturellement le panier moyen vers le haut.</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>⚖️ Équilibre Acquisition vs Rétention</h3>
+                <div style="max-width: 400px; margin: 1rem auto;">
+                    <canvas id="acquisitionChart"></canvas>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Répartition Janvier 2026 :</strong></p>
+                <ul style="padding-left: 1.5rem;">
+                    <li><strong>Nouveaux clients :</strong> 55.5% (1,683 clients)</li>
+                    <li><strong>Clients connus :</strong> 44.5% (1,296 clients)</li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Conclusion :</strong> Équilibre sain et similaire à décembre 2025 (55.7% / 44.3%), confirmant une stratégie d'acquisition robuste sans négliger la fidélisation.</p>
+            </div>
+        </section>
+
+        <!-- RECOMMANDATIONS -->
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+        new Chart(document.getElementById('channelPerformanceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Meta Ads', 'Google Brand', 'Klaviyo'],
+                datasets: [{
+                    label: 'CA Généré (CAD)',
+                    data: [244353, 84512, 33261],
+                    backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: value => value.toLocaleString() + ' CAD' }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('investROIChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Meta Ads', 'Google Brand', 'Klaviyo'],
+                datasets: [
+                    { label: 'Investissement (CAD)', data: [57545, 10918, 0], backgroundColor: '#E53E3E' },
+                    { label: 'CA Généré (CAD)', data: [244353, 84512, 33261], backgroundColor: '#38A169' }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: value => value.toLocaleString() + ' CAD' }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('metaCampaignsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Coffret V2 QC FR', 'ABO TOF', 'Catalogue', 'Coffret V1 QC FR', 'Coffret V2 EN', 'ABO BOF', 'Routines -30%', 'Antirosette', 'Coffret V1 EN', 'Winback 2026'],
+                datasets: [{
+                    label: 'Spend (CAD)',
+                    data: [16473, 9745, 6777, 5939, 4582, 3664, 3097, 2676, 2593, 882],
+                    backgroundColor: '#667eea'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, ticks: { callback: value => value.toLocaleString() + ' CAD' } } }
+            }
+        });
+
+        new Chart(document.getElementById('googleROASChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Brand QC (FR)', 'Brand CA (EN)'],
+                datasets: [{
+                    label: 'ROAS',
+                    data: [7.33, 18.21],
+                    backgroundColor: ['#667eea', '#38A169']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        new Chart(document.getElementById('customerTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Nouveaux Clients (55.0%)', 'Clients Connus (45.0%)'],
+                datasets: [{ data: [55.0, 45.0], backgroundColor: ['#667eea', '#764ba2'] }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        new Chart(document.getElementById('klaviyoCampaignsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Welcome Series', '14JANV Salut Bonjour', '06JANV Nouvelle Routine', '11JANV Routine Hiver', '08JANV Age Update'],
+                datasets: [{
+                    label: 'Revenue (CAD)',
+                    data: [23515, 7726, 3220, 2523, 1597],
+                    backgroundColor: '#667eea'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, ticks: { callback: value => value.toLocaleString() + ' CAD' } } }
+            }
+        });
+
+        new Chart(document.getElementById('acquisitionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Nouveaux Clients (55.5%)', 'Clients Connus (44.5%)'],
+                datasets: [{ data: [55.5, 44.5], backgroundColor: ['#667eea', '#764ba2'] }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+    </script>
+</body>
+</html>
